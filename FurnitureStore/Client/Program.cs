@@ -26,6 +26,7 @@ namespace FurnitureStore.Client
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("FurnitureStore.ServerAPI"));
 
             builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
 
             builder.Services.AddApiAuthorization();
 

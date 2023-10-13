@@ -48,6 +48,7 @@ namespace FurnitureStore.Server
             services.AddSingleton<IDbConnection>((sp) => new SqlConnection(dbConnectionString));
 
             services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
