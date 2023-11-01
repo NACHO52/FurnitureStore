@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace FurnitureStore.Client.Services
 {
-    public interface IProductService
+    public interface IOrderService
     {
-        Task<IEnumerable<Product>> GetByCategory(int categoryId);
-        Task<Product> ProductGet(int id);
+        Task Save(Order order);
     }
 }

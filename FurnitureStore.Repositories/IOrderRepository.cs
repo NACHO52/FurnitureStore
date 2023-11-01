@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace FurnitureStore.Repositories
 {
-    public interface IProductRepository
+    public interface IOrderRepository
     {
-        Task<IEnumerable<Product>> GetByCategoryId(int categoryId);
-        Task<Product> GetDetails(int id);
+        Task<bool> Insert(Order order);
     }
 }

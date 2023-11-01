@@ -22,5 +22,12 @@ namespace FurnitureStore.Repositories
 
             return await _dbConnection.QueryAsync<Product>(sql, new { categoryId});
         }
+
+        public async Task<Product> GetDetails(int id)
+        {
+            var sql = "SELECT Id, Name, Price, CategoryId FROM Products WHERE Id = @id";
+
+            return await _dbConnection.QueryFirstOrDefaultAsync<Product>(sql, new { id });
+        }
     }
 }

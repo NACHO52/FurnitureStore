@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using MudBlazor.Services;
 
 namespace FurnitureStore.Client
 {
@@ -27,8 +28,11 @@ namespace FurnitureStore.Client
 
             builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.AddApiAuthorization();
+            builder.Services.AddMudServices();
 
             await builder.Build().RunAsync();
         }

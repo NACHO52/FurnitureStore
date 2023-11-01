@@ -1,30 +1,104 @@
-﻿@page "/orderDetails"
+﻿@page "/OrderDetails"
 @inject IProductCategoryService ProductCategoryService
 @inject IProductService ProductService
+@inject IClientService ClientService
+@inject IOrderService OrderService
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
 
-<h3>OrderDetails</h3>
 
-@if (ProductCategories != null && Order != null)
+@if (Clients != null && Order != null)
 {
-    <EditForm Model="@Order">
-        <label>Category:</label>
-        <InputSelect class="form-control col-sm-5"
-                     Value="@Order.ProductCategoryId"
-                     ValueChanged="@((int productCategoryId) => ProductCategoryHasChanged(productCategoryId))"
-                     ValueExpression="@(() => Order.ProductCategoryId)">
-            @foreach (var item in ProductCategories)
-            {
-                <option value="@item.Id">@item.Name</option>
-            }
-        </InputSelect>
+    <EditForm Model="@Order" OnValidSubmit="SaveOrder">
 
-        <label>Product:</label>
-        <InputSelect class="form-control col-sm-5" @bind-Value="@ProductId">
-            @foreach (var item in Products)
-                {
-                <option value="@item.Id">@item.Name</option>
-                }
-        </InputSelect>
+        <div class="card">
+            <h5 class="card-header">Order details</h5>
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <input type="submit" class="btn btn-success" value="Save" />
+                            <input type="button" class="btn btn-secondary" value="Cancel" @onclick="Cancel" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Number</label>
+                            <InputNumber class="form-control" @bind-Value="@Order.OrderNumber" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Order date</label>
+                            <InputDate class="form-control" @bind-Value="@Order.OrderDate" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label>Clients</label>
+                            <InputSelect class="form-control" @bind-Value="@Order.ClientId">
+                                @foreach (Client item in Clients)
+                                    {
+                                    <option value="@item.Id">@item.FirstName @item.LastName</option>
+                                    }
+                            </InputSelect>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Delivery Date</label>
+                            <InputDate class="form-control" @bind-Value="@Order.DeliveryDate" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Total</label>
+                            <InputNumber class="form-control" @bind-Value="@Order.Total" />
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <input type="button" class="btn btn-secondary" value="Add product" @onclick="AddProduct" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        @if(Order.Products != null && Order.Products.Any())
+        { 
+            <MudTable Items="@Order.Products" Hover="true" Breakpoint="Breakpoint.Sm">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Products</MudText>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Price</MudTh>
+                    <MudTh>Quantity</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate Context="ProductContext">
+                    <MudTd DataLabel="Name">@ProductContext.Name</MudTd>
+                    <MudTd DataLabel="Price">@ProductContext.Price</MudTd>
+                    <MudTd DataLabel="Quantity">@ProductContext.Quantity</MudTd>
+                    <MudTd DataLabel=""></MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+
     </EditForm>
 }
 else
@@ -35,18 +109,15 @@ else
 @code {
 
     public Order Order;
-    public IEnumerable<ProductCategory> ProductCategories;
-    public IEnumerable<Product> Products;
+    public IEnumerable<Client> Clients;
     public string Message { get; set; }
-    public int ProductId { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
         try
         {
-            Order = new Order() { ProductCategoryId = 1 };
-            ProductCategories = await ProductCategoryService.GetProductCategories();
-            await LoadProducts(Order.ProductCategoryId);
+            Order = new Order() { ProductCategoryId = 1, OrderDate = DateTime.Now, DeliveryDate = DateTime.Now.AddDays(7) };
+            Clients = await ClientService.GetAll();
         }
         catch (Exception e)
         {
@@ -54,17 +125,32 @@ else
         }
     }
 
-    protected async Task ProductCategoryHasChanged(int productCategoryId)
+
+
+    protected async Task SaveOrder()
     {
-        Order.ProductCategoryId = productCategoryId;
-        if (Order.ProductCategoryId > 0)
-        {
-            await LoadProducts(Order.ProductCategoryId);
-        }
+        await OrderService.Save(Order);
+    }
+    private void NavigateToHome()
+    {
+        NavigationManager.NavigateTo("/");
     }
 
-    private async Task LoadProducts(int productCategoryId)
+    protected void Cancel()
     {
-        Products = await ProductService.GetByCategory(productCategoryId);
+        NavigateToHome();
+    }
+
+    protected async Task AddProduct()
+    {
+        var dialog = DialogService.Show<ProductDetails>("Product Details");
+        var result = await dialog.Result;
+
+        if(!result.Cancelled)
+        {
+            var product = (Product)result.Data;
+            Order.Products.Add(product);
+        }
+
     }
 }

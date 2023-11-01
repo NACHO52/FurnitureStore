@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace FurnitureStore.Client.Services
 {
-    public interface IProductService
+    public interface IClientService
     {
-        Task<IEnumerable<Product>> GetByCategory(int categoryId);
-        Task<Product> ProductGet(int id);
+        Task<IEnumerable<FurnitureStore.Shared.Client>> GetAll();
     }
 }

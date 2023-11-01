@@ -13,18 +13,18 @@ namespace FurnitureStore.Server.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductCategoryController : ControllerBase
+    public class ClientController : ControllerBase
     {
-        private readonly IProductCategoryRepository _productCategoryRepository;
-        public ProductCategoryController(IProductCategoryRepository repository)
+        private readonly IClientRepository _repository;
+        public ClientController(IClientRepository repository)
         {
-            _productCategoryRepository = repository;
+            _repository = repository;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<ProductCategory>> Get()
+        public async Task<IEnumerable<FurnitureStore.Shared.Client>> Get()
         {
-            return await _productCategoryRepository.GetAll();
+            return await _repository.GetAll();
         }
     }
 }

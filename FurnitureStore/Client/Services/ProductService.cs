@@ -19,5 +19,10 @@ namespace FurnitureStore.Client.Services
         {
             return await _httpClient.GetFromJsonAsync<IEnumerable<Product>>($"api/Product/category/{categoryId}");
         }
+
+        public async Task<Product> ProductGet(int id)
+        {
+            return await _httpClient.GetFromJsonAsync<Product>($"api/Product/{id}");
+        }
     }
 }
