@@ -1,4 +1,6 @@
 ﻿@page "/OrderDetails"
+@page "/OrderDetails/{id:int}"
+
 @inject IProductCategoryService ProductCategoryService
 @inject IProductService ProductService
 @inject IClientService ClientService
@@ -57,7 +59,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Total</label>
-                            <InputNumber class="form-control" @bind-Value="@Order.Total" />
+                            <input type="text" class="form-control" readonly="readonly" value="@Order.Total.ToString("C")" />
                         </div>
                     </div>
 
@@ -78,8 +80,8 @@
         </div>
 
 
-        @if(Order.Products != null && Order.Products.Any())
-        { 
+        @if (Order.Products != null && Order.Products.Any())
+        {
             <MudTable Items="@Order.Products" Hover="true" Breakpoint="Breakpoint.Sm">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">Products</MudText>
@@ -94,7 +96,15 @@
                     <MudTd DataLabel="Name">@ProductContext.Name</MudTd>
                     <MudTd DataLabel="Price">@ProductContext.Price</MudTd>
                     <MudTd DataLabel="Quantity">@ProductContext.Quantity</MudTd>
-                    <MudTd DataLabel=""></MudTd>
+                    <MudTd DataLabel="">
+                        <MudFab OnClick="@(() => RemoveProduct(ProductContext.Id))"
+                                Color="Color.Secondary"
+                                Icon="@Icons.Material.Filled.Delete"
+                                Size="Size.Small"
+                                IconSize="Size.Small">
+
+                        </MudFab>
+                    </MudTd>
                 </RowTemplate>
             </MudTable>
         }
@@ -112,11 +122,27 @@ else
     public IEnumerable<Client> Clients;
     public string Message { get; set; }
 
+    [Parameter]
+    public int id { get; set; }
+
     protected async override Task OnInitializedAsync()
     {
         try
         {
-            Order = new Order() { ProductCategoryId = 1, OrderDate = DateTime.Now, DeliveryDate = DateTime.Now.AddDays(7) };
+            if(id != 0)
+            {
+                Order = await OrderService.OrderGet(id);
+            }
+            else
+            {
+                Order = new Order()
+                {
+                    OrderNumber = await OrderService.GetNextNumber(),
+                    ProductCategoryId = 1,
+                    OrderDate = DateTime.Now,
+                    DeliveryDate = DateTime.Now.AddDays(7)
+                };
+            }
             Clients = await ClientService.GetAll();
         }
         catch (Exception e)
@@ -146,11 +172,15 @@ else
         var dialog = DialogService.Show<ProductDetails>("Product Details");
         var result = await dialog.Result;
 
-        if(!result.Cancelled)
+        if (!result.Cancelled)
         {
             var product = (Product)result.Data;
             Order.Products.Add(product);
         }
+    }
 
+    protected async Task RemoveProduct(int productId)
+    {
+        Order.Products.RemoveAll(p => p.Id == productId);
     }
 }

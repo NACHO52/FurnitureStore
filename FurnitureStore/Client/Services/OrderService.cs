@@ -15,6 +15,27 @@ namespace FurnitureStore.Client.Services
         {
             _httpClient = httpClient;
         }
+
+        public async Task DeleteOrder(int id)
+        {
+            await _httpClient.DeleteAsync($"api/order/{id}");
+        }
+
+        public async Task<IList<Order>> GetAll()
+        {
+            return await _httpClient.GetFromJsonAsync<IList<Order>>($"api/order/GetAll/");
+        }
+
+        public async Task<int> GetNextNumber()
+        {
+            return await _httpClient.GetFromJsonAsync<int>($"api/order/getnextnumber/");
+        }
+
+        public async Task<Order> OrderGet(int id)
+        {
+            return await _httpClient.GetFromJsonAsync<Order>($"api/order/{id}");
+        }
+
         public async Task Save(Order order)
         {
             if(order.Id == 0)
@@ -23,7 +44,7 @@ namespace FurnitureStore.Client.Services
             }
             else
             {
-
+                await _httpClient.PutAsJsonAsync<Order>($"api/order/{order.Id}", order);
             }
             
         }

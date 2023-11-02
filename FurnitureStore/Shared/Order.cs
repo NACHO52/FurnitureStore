@@ -17,7 +17,17 @@ namespace FurnitureStore.Shared
         public int ClientId { get; set; }
         public DateTime OrderDate { get; set; }
         public DateTime DeliveryDate { get; set; }
-        public decimal Total { get; set; }
+        public decimal Total { 
+            get 
+            {
+                decimal suma = 0;
+                if(Products != null && Products.Any())
+                {
+                    suma = Products.Sum(p => (p.Price * p.Quantity));
+                }
+                return suma;
+            } 
+        }
         public int ProductCategoryId { get; set; }
         public List<Product> Products { get; set; }
     }

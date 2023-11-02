@@ -1,0 +1,72 @@
+﻿@page "/"
+@inject NavigationManager NavigationManager
+@inject IOrderService OrderService
+
+@if (Orders != null && Orders.Any())
+{
+    <MudTable Items="Orders" Hover="true" Breakpoint="Breakpoint.Sm">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Orders</MudText>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Number</MudTh>
+            <MudTh>Client</MudTh>
+            <MudTh>Order Date</MudTh>
+            <MudTh>Delivery Date</MudTh>
+            <MudTh>Category</MudTh>
+            <MudTh>Total</MudTh>
+            <MudTh></MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Number">@context.OrderNumber</MudTd>
+            <MudTd DataLabel="Client">@context.ClientId</MudTd>
+            <MudTd DataLabel="Order Date">@context.OrderDate.ToString("dd/MM/yyy")</MudTd>
+            <MudTd DataLabel="Delivery Date">@context.DeliveryDate.ToString("dd/MM/yyy")</MudTd>
+            <MudTd DataLabel="Category">@context.ProductCategoryId</MudTd>
+            <MudTd DataLabel="Total">@context.Total.ToString("C")</MudTd>
+            <MudTd DataLabel="">
+                <MudFab OnClick="@(() => Edit(context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small">
+                </MudFab>
+            </MudTd>
+            <MudTd DataLabel="">
+                <MudFab OnClick="@(() => Delete(context.Id))" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small">
+                </MudFab>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+else
+{ 
+    <p>No data</p>
+}
+
+
+@code {
+
+    public List<Order> Orders;
+    public string Message { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+            Orders = (List<Order>)await OrderService.GetAll();
+        }
+        catch (Exception e)
+        {
+            Message = "There was an error on..." + e.Message;
+        }
+    }
+
+    protected async Task Edit(int id)
+    {
+        NavigationManager.NavigateTo($"/OrderDetails/{id}");
+    }
+
+    protected async Task Delete(int id)
+    {
+        await OrderService.DeleteOrder(id);
+        Orders.RemoveAll(prop => prop.Id == id);
+    }
+}
